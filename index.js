@@ -4,8 +4,11 @@ const { ObjectId } = require('mongodb');
 const { connectToDb, getDb } = require('./database/db');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 let db;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 connectToDb((err) => {
   if (!err) {
@@ -18,38 +21,45 @@ connectToDb((err) => {
   }
 });
 
-app.get('/books/:id', async (req, res) => {
+app.get('/books', async (req, res) => {
   let books = [];
-  // reference collection, sort, return a cursor.
-  // Then, a cursor method, like forEach to iterate each document.
-  // a promise that can be resolved
 
-  if (req.params.id) {
-    if (ObjectId.isValid(req.params.id))
-      db.collection('books')
-        .findOne({ _id: new ObjectId(req.params.id) })
-        .then(el => {
-          res.status(200).json({
-            data: el
-          });
-        })
-        .catch(e => {
-          res.status(500).json({
-            error: 'could not fetch data'
-          });
-        });
-    else res.status(500).json({ error: 'Not a valid id' });
-  } else {
+  db.collection('books')
+    .find()
+    .toArray()
+    .then((el) => {
+      res.status(200).json(el);
+    })
+    .catch(e => {
+      res.status(500).json({
+        error: 'could not fetch the book'
+      });
+    });
+});
+
+app.get('/books/:id', (req, res) => {
+  if (ObjectId.isValid(req.params.id))
     db.collection('books')
-      .find()
-      .toArray()
-      .then((el) => {
-        res.status(200).json(el);
+      .findOne({ _id: new ObjectId(req.params.id) })
+      .then(el => {
+        res.status(200).json({
+          data: el
+        });
       })
       .catch(e => {
         res.status(500).json({
-          error: 'could not fetch the book'
+          error: 'could not fetch data'
         });
       });
-  }
+  else res.status(500).json({ error: 'Not a valid id' });
+});
+
+app.post('/books', (req, res) => {
+  const book = req.body;
+
+  db.collection('books').insertOne(book).then(result => {
+    res.status(200).json({
+      result
+    });
+  }).catch(e => res.status(500).json({ error: "Could not create new document: " + e }))
 });
