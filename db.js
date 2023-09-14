@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const mongoConnectionString = 'mongodb+srv://seagayi:chiseagayi@front.1lvvmaz.mongodb.net/';
+const mongoConnectionString = process.env.CONNECTSTRING;
 let dbConnection;
 
 module.exports = {
