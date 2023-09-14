@@ -91,3 +91,24 @@ app.patch('/books/:id', (req, res) => {
       .catch(e => res.status(500).json({ message: 'Could not update document: ' + e }));
   else res.status(500).json({ message: 'Not a valid id' });
 });
+
+app.get('/api/index', (req, res) => {
+  db.collection('books').createIndex({ pages: 1 })
+    .then((result) => {
+      res.status(200).json({
+        status: 'success',
+        message: 'Index created successfully',
+        data: result
+      })
+    })
+    .catch(e => res.status(404).json({ message: 'An error occurred ' + e }));
+});
+
+app.get('/api/getindex', (req, res) => {
+  db.collection('books').listIndexes().toArray().then(index => {
+    res.status(200).json({
+      status: 'success',
+      data: index
+    });
+  }).catch(e => console.log(e));
+});
