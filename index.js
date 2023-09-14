@@ -24,8 +24,13 @@ connectToDb((err) => {
 app.get('/books', async (req, res) => {
   let books = [];
 
+  const page = req.query.p || 1;
+  const booksPerPage = 3;
+
   db.collection('books')
     .find()
+    .skip((page - 1) * booksPerPage)
+    .limit(booksPerPage)
     .toArray()
     .then((el) => {
       res.status(200).json(el);
